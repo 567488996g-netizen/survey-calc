@@ -44,15 +44,15 @@ input:focus{outline:2px solid var(--ac);border-color:transparent}
   <div class="card">
     <h2>จุดตั้งกล้อง (INST)</h2>
     <div class="row">
-      <div><label>N (INST)</label><input id="ni" type="number" step="any" inputmode="decimal"></div>
-      <div><label>E (INST)</label><input id="ei" type="number" step="any" inputmode="decimal"></div>
+      <div><label>N (INST)</label><input id="ni" type="text" inputmode="decimal" autocomplete="off"></div>
+      <div><label>E (INST)</label><input id="ei" type="text" inputmode="decimal" autocomplete="off"></div>
     </div>
   </div>
   <div class="card">
     <h2>จุดเล็ง (FS)</h2>
     <div class="row">
-      <div><label>N (FS)</label><input id="nf" type="number" step="any" inputmode="decimal"></div>
-      <div><label>E (FS)</label><input id="ef" type="number" step="any" inputmode="decimal"></div>
+      <div><label>N (FS)</label><input id="nf" type="text" inputmode="decimal" autocomplete="off"></div>
+      <div><label>E (FS)</label><input id="ef" type="text" inputmode="decimal" autocomplete="off"></div>
     </div>
     <div class="btns">
       <button class="btn p" onclick="calc1()">คำนวณ</button>
@@ -68,18 +68,18 @@ input:focus{outline:2px solid var(--ac);border-color:transparent}
   <div class="card">
     <h2>จุดเริ่มต้น</h2>
     <div class="row">
-      <div><label>N</label><input id="n0" type="number" step="any" inputmode="decimal"></div>
-      <div><label>E</label><input id="e0" type="number" step="any" inputmode="decimal"></div>
+      <div><label>N</label><input id="n0" type="text" inputmode="decimal" autocomplete="off"></div>
+      <div><label>E</label><input id="e0" type="text" inputmode="decimal" autocomplete="off"></div>
     </div>
   </div>
   <div class="card">
     <h2>มุมแอซิมุท (AZ) และระยะ</h2>
     <div class="row3">
-      <div><label>องศา °</label><input id="ad" type="number" step="any" inputmode="decimal"></div>
-      <div><label>ลิปดา '</label><input id="am" type="number" step="any" inputmode="decimal"></div>
-      <div><label>ฟิลิปดา "</label><input id="as" type="number" step="any" inputmode="decimal"></div>
+      <div><label>องศา °</label><input id="ad" type="text" inputmode="decimal" autocomplete="off"></div>
+      <div><label>ลิปดา '</label><input id="am" type="text" inputmode="decimal" autocomplete="off"></div>
+      <div><label>ฟิลิปดา "</label><input id="as" type="text" inputmode="decimal" autocomplete="off"></div>
     </div>
-    <div style="margin-top:10px"><label>ระยะ (DIST)</label><input id="dd" type="number" step="any" inputmode="decimal"></div>
+    <div style="margin-top:10px"><label>ระยะ (DIST)</label><input id="dd" type="text" inputmode="decimal" autocomplete="off"></div>
     <div class="btns">
       <button class="btn p" onclick="calc2()">คำนวณ</button>
       <button class="btn" onclick="clr2()">ล้างผลลัพธ์</button>
@@ -92,7 +92,12 @@ input:focus{outline:2px solid var(--ac);border-color:transparent}
 
 <script>
 const $=id=>document.getElementById(id);
-const num=id=>{const v=$(id).value.trim();return v===""?NaN:parseFloat(v)};
+// รับทั้งจุด (.) และจุลภาค (,) เป็นทศนิยม และตัดช่องว่างออก
+const num=id=>{
+  const v=$(id).value.trim().replace(/\s/g,"").replace(/,/g,".");
+  if(v===""||!/^-?\d*\.?\d+$|^-?\d+\.$/.test(v))return NaN;
+  return parseFloat(v);
+};
 
 function tab(n){
   $("p1").classList.toggle("hide",n!==1);
@@ -102,7 +107,7 @@ function tab(n){
 }
 
 function dms(g){
-  let t=Math.round(g*3600*100)/100;          // รวมเป็นฟิลิปดา ปัดทศนิยม 2 ตำแหน่ง
+  let t=Math.round(g*3600*100)/100;
   if(t>=360*3600) t-=360*3600;
   const d=Math.floor(t/3600);
   const m=Math.floor((t-d*3600)/60);
@@ -113,7 +118,7 @@ function dms(g){
 let count=0;
 function calc1(){
   const ni=num("ni"),ei=num("ei"),nf=num("nf"),ef=num("ef");
-  if([ni,ei,nf,ef].some(isNaN)){$("e1").textContent="กรุณากรอก N, E ของ INST และ FS ให้ครบ";return}
+  if([ni,ei,nf,ef].some(isNaN)){$("e1").textContent="กรุณากรอก N, E ของ INST และ FS ให้ครบ (เป็นตัวเลขเท่านั้น)";return}
   $("e1").textContent="";
   const dn=nf-ni,de=ef-ei;
   const dist=Math.hypot(dn,de);
@@ -135,7 +140,7 @@ function calc2(){
   const n0=num("n0"),e0=num("e0"),dist=num("dd");
   let d=num("ad"),m=num("am"),s=num("as");
   if(isNaN(m))m=0; if(isNaN(s))s=0;
-  if([n0,e0,dist,d].some(isNaN)){$("e2").textContent="กรุณากรอก N, E, องศา และระยะ";return}
+  if([n0,e0,dist,d].some(isNaN)){$("e2").textContent="กรุณากรอก N, E, องศา และระยะ (เป็นตัวเลขเท่านั้น)";return}
   $("e2").textContent="";
   const az=d+m/60+s/3600, r=az*Math.PI/180;
   const n=n0+dist*Math.cos(r), e=e0+dist*Math.sin(r);
@@ -148,7 +153,6 @@ function calc2(){
 }
 function clr2(){$("out2").innerHTML="";$("e2").textContent=""}
 
-// กด Enter เพื่อคำนวณ
 ["ni","ei","nf","ef"].forEach(id=>$(id).addEventListener("keydown",e=>{if(e.key==="Enter")calc1()}));
 ["n0","e0","ad","am","as","dd"].forEach(id=>$(id).addEventListener("keydown",e=>{if(e.key==="Enter")calc2()}));
 </script>
